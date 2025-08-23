@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Q-lite Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+  <header class="p-4 bg-blue-600 text-white text-center font-bold text-xl">
+    Q-lite Queue Dashboard
+  </header>
+
+  <main class="p-6 max-w-7xl mx-auto">
+    <div id="content" class="space-y-6">
+      <p class="text-gray-600">Connecting to server...</p>
+    </div>
+  </main>
+
+  <script>
+    const content = document.getElementById('content');
+
+    function render() {
+      content.innerHTML = '<p class="text-gray-600">Waiting for data...</p>';
+    }
+
+    function renderQueues(queues) {
+      if (!queues.length) {
+        content.innerHTML = '<p class="text-center text-gray-500 text-lg">No queues found. Add jobs via API to create queues.</p>';
+        return;
+      }
+
+      const html = queues.map(queue => {
+        const counts = queue.counts || {};
+        const jobs = queue.jobs || [];
+
+        const jobsHtml = jobs.length
+          ? `<div class="overflow-x-auto max-h-72 overflow-y-auto border rounded p-2">
+              <table class="min-w-full text-left text-sm">
+                <thead>
+                  <tr>
+                    <th class="border px-2 py-1">ID</th>
+                    <th class="border px-2 py-1">Status</th>
+                    <th class="border px-2 py-1">Priority</th>
+                    <th class="border px-2 py-1">Attempts</th>
+                    <th class="border px-2 py-1">Progress</th>
+                    <th class="border px-2 py-1">Delay Until</th>
+                    <th class="border px-2 py-1">Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${jobs.map(job => `
+                    <tr class="border-b hover:bg-gray-100">
+                      <td class="border px-2 py-1">${job.id.slice(0, 8)}</td>
+                      <td class="border px-2 py-1 capitalize">${job.status}</td>
+                      <td class="border px-2 py-1">${job.priority}</td>
+                      <td class="border px-2 py-1">${job.attemptsMade} / ${job.attempts}</td>
+                      <td class="border px-2 py-1">${job.progress}%</td>
+                      <td class="border px-2 py-1">${job.delayUntil ? new Date(job.delayUntil).toLocaleTimeString() : '-'}</td>
+                      <td class="border px-2 py-1"><pre class="whitespace-pre-wrap max-w-xs">${JSON.stringify(job.data)}</pre></td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>`
+          : '<p class="text-gray-500 italic">No jobs yet</p>';
+
+        return `
+          <section class="bg-white rounded shadow p-4">
+            <h2 class="font-semibold text-lg mb-2">Queue: ${queue.name}</h2>
+            <div class="mb-4 flex space-x-4 text-sm">
+              <div><strong>Pending:</strong> ${counts.pending || 0}</div>
+              <div><strong>Delayed:</strong> ${counts.delayed || 0}</div>
+              <div><strong>Active:</strong> ${counts.active || 0}</div>
+              <div><strong>Completed:</strong> ${counts.completed || 0}</div>
+              <div><strong>Failed:</strong> ${counts.failed || 0}</div>
+            </div>
+            ${jobsHtml}
+          </section>
+        `;
+      }).join('');
+
+      content.innerHTML = html;
+    }
+
+    let socket;
+
+    function connectWS() {
+      socket = new WebSocket(`ws://${location.host}`);
+
+      socket.onopen = () => {
+        content.innerHTML = '<p class="text-green-600">Connected. Loading data...</p>';
+      };
+
+      socket.onmessage = event => {
+        const data = JSON.parse(event.data);
+        renderQueues(data);
+      };
+
+      socket.onclose = () => {
+        content.innerHTML += '<p class="text-red-600 mt-4">Disconnected. Reconnecting...</p>';
+        setTimeout(connectWS, 2000);
+      };
+
+      socket.onerror = () => {
+        content.innerHTML += '<p class="text-red-600 mt-4">WebSocket error. Check server.</p>';
+        socket.close();
+      };
+    }
+
+    connectWS();
+  </script>
+</body>
+
+</html>

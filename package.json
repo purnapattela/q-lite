@@ -1,0 +1,19 @@
+{
+  "name": "@purnapattela/q-lite",
+  "version": "1.0.0",
+  "description": "Q-lite is a simple queue system with GUI",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/purnapattela/q-lite.git"
+  },
+  "keywords": [
+    "queue"
+  ],
+  "author": "purnapattela",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/purnapattela/q-lite/issues"
+  },
+  "homepage": "https://github.com/purnapattela/q-lite#readme"
+}
