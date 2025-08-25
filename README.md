@@ -7,7 +7,7 @@ A lightweight in-memory queue system mimicking RabbitMQ/BullMQ features — zero
 ## Installation
 
 ```bash
-npm install q-lite
+npm install @purnapattela/q-lite
 ```
 
 ---
@@ -15,7 +15,7 @@ npm install q-lite
 ## Usage
 
 ```js
-const { createServer, registerProcessor } = require('q-lite');
+const { createServer, registerProcessor } = require('@purnapattela/q-lite');
 const crypto = require('crypto');
 
 const apiKey = crypto.randomBytes(16).toString('hex');

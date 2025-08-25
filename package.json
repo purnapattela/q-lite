@@ -1,6 +1,6 @@
 {
   "name": "@purnapattela/q-lite",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Q-lite is a simple queue system with GUI",
   "main": "src/index.js",
   "repository": {

@@ -12,7 +12,7 @@ A lightweight in-memory job queue system inspired by RabbitMQ/BullMQ with zero d
 ## Installation
 
 ```bash
-npm install q-lite
+npm install @purnapattela/q-lite
 ```
 
 ---
@@ -20,7 +20,7 @@ npm install q-lite
 ## Quick Start
 
 ```js
-const { createServer, registerProcessor } = require('q-lite');
+const { createServer, registerProcessor } = require('@purnapattela/q-lite');
 const crypto = require('crypto');
 
 const apiKey = crypto.randomBytes(16).toString('hex');
