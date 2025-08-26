@@ -26,7 +26,7 @@ registerProcessor('emailQueue', async (jobData) => {
   await new Promise(r => setTimeout(r, 2000));
 });
 
-createServer(apiKey, 3000);
+createServer(apiKey, 3000, '*');
 
 console.log('API Key:', apiKey);
 ```
@@ -35,12 +35,13 @@ console.log('API Key:', apiKey);
 
 ## API
 
-### `createServer(apiKey, port)`
+### `createServer(apiKey, port[, allowOrigin])`
 
 Starts the HTTP + WebSocket server with dashboard and REST API.
 
 * `apiKey` (string): A secret key used to authenticate API requests.
 * `port` (number): Port number to listen on.
+* `allowOrigin` (String) : By default it was set to `*` can change it by passing the url
 
 ### `registerProcessor(queueName, asyncProcessorFn)`
 

@@ -2,10 +2,19 @@ const url = require('url');
 const { StringDecoder } = require('string_decoder');
 const queueManager = require('./queueManager');
 
-function handleApiRequest(req, res, apiKey) {
+function handleApiRequest(req, res, apiKey, allowOrigin = "*") {
     const parsed = url.parse(req.url, true);
     const method = req.method;
     const pathname = parsed.pathname;
+
+    res.setHeader('Access-Control-Allow-Origin', allowOrigin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
+
+    if (method === 'OPTIONS') {
+        res.writeHead(204);
+        return res.end();
+    }
 
     if (pathname === '/status' && method === 'GET') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -16,8 +25,8 @@ function handleApiRequest(req, res, apiKey) {
     if (pathname.startsWith('/add/') && method === 'POST') {
         const providedKey = req.headers['x-api-key'];
         if (providedKey !== apiKey) {
-            res.writeHead(403);
-            return res.end('Forbidden');
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: 'Forbidden' }));
         }
 
         const queueName = pathname.split('/')[2];
@@ -36,8 +45,8 @@ function handleApiRequest(req, res, apiKey) {
             try {
                 data = JSON.parse(body);
             } catch {
-                res.writeHead(400);
-                return res.end('Invalid JSON');
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                return res.end(JSON.stringify({ error: 'Invalid JSON' }));
             }
 
             const options = {
@@ -49,6 +58,7 @@ function handleApiRequest(req, res, apiKey) {
 
             const queue = queueManager.getQueue(queueName);
             const job = queue.add(data, options);
+
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ id: job.id }));
         });
@@ -56,8 +66,8 @@ function handleApiRequest(req, res, apiKey) {
         return;
     }
 
-    res.writeHead(404);
-    res.end('Not found');
+    res.writeHead(404, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'Not found' }));
 }
 
 module.exports = handleApiRequest;
